@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>make.fun — Leonida General Hospital discharge summary</title>
+<style>
+  :root{
+    --paper:#F1F5EE;
+    --ink:#14201B;
+    --pine:#123B34;
+    --green:#1F6B57;
+    --mint:#CFE3D8;
+    --rule:#A9BDB2;
+    --red:#C0332A;
+    --magenta:#E5007E;
+    --display:"Archivo Narrow","Arial Narrow",sans-serif;
+    --body:"Public Sans","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono","Courier New",monospace;
+    --script:"Caveat","Segoe Script",cursive;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1024px;height:1024px;overflow:hidden;background:var(--paper)}
+  body{font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .sheet{position:relative;width:1024px;height:1024px;background:var(--paper);overflow:hidden}
+
+  /* ---------- top band ---------- */
+  .band{
+    background:var(--pine);color:#EFF7F2;
+    padding:24px 56px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .emblem{width:46px;height:46px;flex:none}
+  .hospital{font-family:var(--display);font-weight:700;font-size:31px;line-height:1;letter-spacing:.015em;text-transform:uppercase}
+  .dept{font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mint);margin-top:7px}
+  .band-right{text-align:right;font-family:var(--mono);font-size:11px;letter-spacing:.12em;line-height:1.7;text-transform:uppercase;color:#EFF7F2}
+  .band-right b{display:block;font-weight:600;font-size:13px;letter-spacing:.16em}
+  .band-right span{color:var(--mint)}
+
+  /* ---------- body ---------- */
+  .body{padding:34px 56px 0;position:relative}
+
+  .kicker{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--green);display:flex;justify-content:space-between;align-items:center;
+  }
+  .kicker .ref{color:var(--ink);opacity:.72;letter-spacing:.1em}
+
+  .title{
+    font-family:var(--display);font-weight:700;font-size:79px;line-height:.92;
+    letter-spacing:.004em;text-transform:uppercase;color:var(--pine);
+    margin-top:8px;
+  }
+  .rule-double{border-top:2px solid var(--pine);border-bottom:1px solid var(--pine);height:5px;margin-top:12px}
+
+  .meta{
+    display:flex;justify-content:space-between;gap:18px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--green);padding:9px 0 0;
+  }
+  .meta b{color:var(--ink);font-weight:600}
+
+  /* ---------- patient grid ---------- */
+  .patient{
+    display:grid;grid-template-columns:1.32fr 1fr;gap:14px 34px;
+    padding:20px 0 18px;border-bottom:1px solid var(--rule);margin-top:16px;
+  }
+  .field .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--green);margin-bottom:5px}
+  .field .val{font-size:17px;font-weight:600;letter-spacing:.005em;line-height:1.2;border-bottom:1px dotted var(--rule);padding-bottom:6px}
+  .field .val small{font-weight:400;font-size:12px;color:var(--green);letter-spacing:.02em}
+
+  /* ---------- diagnosis ---------- */
+  .dx{display:flex;align-items:flex-start;gap:22px;padding:18px 0 16px;border-bottom:1px solid var(--rule)}
+  .dx-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--green);width:132px;flex:none;padding-top:9px}
+  .dx-val{font-family:var(--display);font-weight:700;font-size:34px;line-height:.98;letter-spacing:.01em;text-transform:uppercase;color:var(--ink)}
+  .dx-val em{display:block;font-family:var(--body);font-style:normal;font-weight:500;font-size:12.5px;letter-spacing:.02em;text-transform:none;color:var(--green);margin-top:7px}
+
+  /* ---------- notes ---------- */
+  .notes{display:grid;grid-template-columns:1fr 1fr;gap:0 34px;padding:6px 0 0}
+  .note{padding:11px 0;border-bottom:1px solid var(--rule)}
+  .note .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+  .note .val{font-size:14px;line-height:1.34}
+  .note .val strong{font-weight:700}
+  .wide{grid-column:1 / -1}
+
+  /* ---------- billing ---------- */
+  .bill{
+    margin-top:16px;background:#E6F0E9;border:1px solid var(--rule);
+    border-left:6px solid var(--magenta);
+    display:flex;align-items:center;gap:20px;padding:16px 22px 16px 18px;
+  }
+  .bill .ghost{width:118px;height:118px;flex:none}
+  .bill-mid{flex:1;min-width:0}
+  .bill-lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--green)}
+  .bill-name{font-family:var(--display);font-weight:700;font-size:28px;line-height:1;text-transform:uppercase;color:var(--ink);margin-top:3px}
+  .bill-brand{display:flex;align-items:baseline;gap:9px;margin-top:4px}
+  .wordmark{font-family:var(--body);font-weight:800;font-size:34px;line-height:1;letter-spacing:-.035em;color:var(--magenta)}
+  .bill-brand span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--green)}
+  .bill-note{font-size:12px;line-height:1.35;color:var(--ink);margin-top:7px;max-width:430px}
+  .bill-due{text-align:right;flex:none;padding-left:8px}
+  .bill-due .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--green)}
+  .bill-due .amt{font-family:var(--display);font-weight:700;font-size:50px;line-height:1;color:var(--pine);margin-top:2px}
+  .bill-due .paid{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-top:3px}
+
+  /* ---------- sign-off ---------- */
+  .signoff{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-top:20px;padding:0 6px 0 2px}
+  .sig{width:300px}
+  .sig-name{font-family:var(--script);font-size:44px;line-height:.9;color:var(--pine);padding-left:6px}
+  .sig-rule{border-bottom:1.5px solid var(--pine);margin-top:5px}
+  .sig-lab{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-top:6px}
+
+  .stamp{
+    transform:rotate(-8deg);
+    border:3px double var(--red);border-radius:7px;color:var(--red);
+    padding:9px 18px 8px;text-align:center;background:rgba(241,245,238,.55);
+    box-shadow:0 0 0 2px rgba(192,51,42,.18) inset;
+  }
+  .stamp .big{font-family:var(--display);font-weight:700;font-size:35px;line-height:.9;letter-spacing:.06em;text-transform:uppercase}
+  .stamp .small{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;margin-top:5px}
+
+  /* ---------- footer ---------- */
+  .foot{
+    position:absolute;left:0;right:0;bottom:0;
+    border-top:2px solid var(--pine);
+    padding:15px 56px 18px;
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    background:#E9F1EA;
+  }
+  .foot-left{display:flex;align-items:center;gap:12px}
+  .foot .ghost{width:50px;height:50px;flex:none}
+  .foot-brand{font-family:var(--body);font-weight:800;font-size:26px;letter-spacing:-.035em;line-height:1;color:var(--magenta)}
+  .foot-line{font-size:11.5px;line-height:1.3;color:var(--ink);margin-top:3px;max-width:520px}
+  .foot-right{text-align:right;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--green);line-height:1.6}
+  .foot-right b{display:block;color:var(--ink);font-weight:600;font-size:12px;letter-spacing:.06em}
+  .fiction{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);opacity:.8;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="ghost" viewBox="0 0 120 120">
+        <path d="M30 98 L30 52 C30 30 44 17 60 17 C76 17 90 30 90 52 L90 98 L79 85 L68 98 L57 85 L46 98 L35 85 Z"
+              fill="#fff" stroke="#14201B" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M0 -11 C1.4 -3.2 3.2 -1.4 11 0 C3.2 1.4 1.4 3.2 0 11 C-1.4 3.2 -3.2 1.4 -11 0 C-3.2 -1.4 -1.4 -3.2 0 -11 Z"
+              fill="#14201B" transform="translate(49 52)"/>
+        <path d="M0 -11 C1.4 -3.2 3.2 -1.4 11 0 C3.2 1.4 1.4 3.2 0 11 C-1.4 3.2 -3.2 1.4 -11 0 C-3.2 -1.4 -1.4 -3.2 0 -11 Z"
+              fill="#14201B" transform="translate(71 52)"/>
+        <circle cx="90" cy="83" r="7.5" fill="#fff" stroke="#14201B" stroke-width="5"/>
+        <circle cx="100" cy="73" r="15" fill="#E5007E" stroke="#14201B" stroke-width="5"/>
+        <polygon points="100.00,65.80 102.12,71.09 107.80,71.47 103.42,75.11 104.82,80.63 100.00,77.60 95.18,80.63 96.58,75.11 92.20,71.47 97.88,71.09"
+                 fill="#fff"/>
+      </symbol>
+      <symbol id="cross" viewBox="0 0 48 48">
+        <rect x="1.5" y="1.5" width="45" height="45" rx="7" fill="none" stroke="#EFF7F2" stroke-width="2.5"/>
+        <path d="M24 11 V37 M11 24 H37" stroke="#EFF7F2" stroke-width="7" stroke-linecap="round"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="band">
+    <div class="brand">
+      <svg class="emblem"><use href="#cross"/></svg>
+      <div>
+        <div class="hospital">Leonida General Hospital</div>
+        <div class="dept">Emergency Department · Vice City</div>
+      </div>
+    </div>
+    <div class="band-right">
+      <b>Form 6-VI</b>
+      <span>Patient copy · 19 Nov 2026</span>
+    </div>
+  </header>
+
+  <main class="body">
+    <div class="kicker">
+      <span>Medical record · discharge</span>
+      <span class="ref">Ref LGH-26-1119</span>
+    </div>
+
+    <h1 class="title">Discharge Summary</h1>
+    <div class="rule-double"></div>
+    <div class="meta">
+      <span>Admitted <b>17 Sep 2013</b></span>
+      <span>Discharged <b>19 Nov 2026</b></span>
+      <span>Ward <b>Waiting Room 6</b></span>
+    </div>
+
+    <div class="patient">
+      <div class="field">
+        <div class="lab">Patient</div>
+        <div class="val">The last person still waiting</div>
+      </div>
+      <div class="field">
+        <div class="lab">Attending physician</div>
+        <div class="val">Dr. Ghost, M.D. <small>· make.fun</small></div>
+      </div>
+      <div class="field">
+        <div class="lab">Length of stay</div>
+        <div class="val">13 years, 2 months, 2 days</div>
+      </div>
+      <div class="field">
+        <div class="lab">Delays on record</div>
+        <div class="val">Two (2), both terminal</div>
+      </div>
+    </div>
+
+    <div class="dx">
+      <div class="dx-lab">Diagnosis</div>
+      <div class="dx-val">
+        Chronic GTA-VI deficiency
+        <em>Leonida fever · contagious only among gamers</em>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="note">
+        <div class="lab">Presenting complaint</div>
+        <div class="val">“It’s definitely this year.” <strong>(said 13 times)</strong></div>
+      </div>
+      <div class="note">
+        <div class="lab">Complications</div>
+        <div class="val">1,337 trailer rewatches · 120 GB preload · one boss told “I’m sick”</div>
+      </div>
+      <div class="note wide">
+        <div class="lab">Treatment</div>
+        <div class="val"><strong>Grand Theft Auto VI, 120 GB, one dose at launch.</strong> Take with Jason &amp; Lucia. Do not drive to Vice City before the day-one patch.</div>
+      </div>
+    </div>
+
+    <div class="bill">
+      <svg class="ghost"><use href="#ghost"/></svg>
+      <div class="bill-mid">
+        <div class="bill-lab">Treatment covered by</div>
+        <div class="bill-name">My AI agent</div>
+        <div class="bill-brand"><span class="wordmark">make.fun</span><span>Bounty winnings</span></div>
+        <div class="bill-note">It earned the copay in a make.fun bounty while I sat in the waiting room.</div>
+      </div>
+      <div class="bill-due">
+        <div class="lab">Balance due</div>
+        <div class="amt">$0.00</div>
+        <div class="paid">Paid in full</div>
+      </div>
+    </div>
+
+    <div class="signoff">
+      <div class="sig">
+        <div class="sig-name">Dr. Ghost</div>
+        <div class="sig-rule"></div>
+        <div class="sig-lab">Attending physician · make.fun</div>
+      </div>
+      <div class="stamp">
+        <div class="big">Fit to play</div>
+        <div class="small">Discharged 19 Nov 2026</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="foot-left">
+      <svg class="ghost"><use href="#ghost"/></svg>
+      <div>
+        <div class="foot-brand">make.fun</div>
+        <div class="foot-line">People and their AI agents get paid to make things. Ask mine — it covered the bill.</div>
+        <div class="fiction">This is a work of fiction. The 13-year wait was not.</div>
+      </div>
+    </div>
+    <div class="foot-right">
+      <b>@makefunai</b>
+      make.fun/bounty<br>gta6-meme-x-01
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
